@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:graduation/constant/constant.dart';
+import 'package:graduation/models/ChatMsgModel.dart';
 
 import '../../controller/chat_api_controller.dart';
 import '../../models/ChatDataModel.dart';
@@ -21,18 +22,32 @@ class PrivateChat extends StatefulWidget {
 class _PrivateChatState extends State<PrivateChat> {
   late ChatDataModel receivedData;
   late TextEditingController controller;
+  late ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     receivedData = widget.data;
     controller = TextEditingController();
+
   }
 
   void dispose() {
     controller.dispose();
     super.dispose();
   }
+
+
+  Stream<List<ChatMsgModel>> getStream() async* {
+    int i = 0;
+    while ( i < 10){
+      List<ChatMsgModel> myStreamData = await chatApiController().GetChatMassage(id: receivedData.Id);
+
+      await Future.delayed(Duration(milliseconds: 200));
+
+          yield myStreamData;
+      }
+      }
 
   @override
   Widget build(BuildContext context) {
@@ -79,8 +94,8 @@ class _PrivateChatState extends State<PrivateChat> {
         ),
         body: Column(
           children: [
-            FutureBuilder(
-              future: chatApiController().GetChatMassage(id: receivedData.Id),
+            StreamBuilder(
+              stream: getStream(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(
@@ -94,6 +109,7 @@ class _PrivateChatState extends State<PrivateChat> {
                       child: ListView.builder(
                           // shrinkWrap: true,
                           // reverse: true,
+                        // controller: scrollController.jumpTo(scrollController.position.maxScrollExtent) ,
                           itemCount: snapshot.data!.length,
                           scrollDirection: Axis.vertical,
                           itemBuilder: (context, index) {

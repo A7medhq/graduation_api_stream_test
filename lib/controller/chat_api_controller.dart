@@ -14,7 +14,7 @@ class chatApiController {
       'Accept': 'application/json',
       'Authorization': token,
     });
-    print('chaattttt${response.body}');
+    // print('chaattttt${response.body}');
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
       var DecodedData = data['data'] as List;
